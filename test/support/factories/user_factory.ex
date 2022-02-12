@@ -8,8 +8,14 @@ defmodule Hider.Factories.UserFactory do
         middle_name = Faker.Person.PtBr.last_name()
         last_name = Faker.Person.PtBr.last_name()
 
-        username = "#{first_name}.#{middle_name}.#{last_name}"
-        email = "#{first_name}.#{middle_name}.#{last_name}@email.com"
+        username =
+          "#{first_name}.#{middle_name}.#{last_name}"
+          |> String.replace(" ", "")
+
+        email =
+          "#{first_name}.#{middle_name}.#{last_name}@email.com"
+          |> String.replace(" ", "")
+          |> String.downcase()
 
         password = "admin123"
         salt = Bcrypt.Base.gen_salt()
