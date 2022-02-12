@@ -17,13 +17,20 @@ defmodule HiderWeb.Router do
   scope "/", HiderWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/users", UserLive.Index, :index
+    live "/users/new", UserLive.Index, :new
+    live "/users/:id/edit", UserLive.Index, :edit
+
+    live "/users/:id", UserLive.Show, :show
+    live "/users/:id/show/edit", UserLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", HiderWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", HiderWeb do
+    pipe_through :api
+
+    resources "/users", UserController, except: [:new, :edit]
+  end
 
   # Enables LiveDashboard only for development
   #
