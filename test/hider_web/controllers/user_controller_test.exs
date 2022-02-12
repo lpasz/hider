@@ -1,92 +1,90 @@
 defmodule HiderWeb.UserControllerTest do
   use HiderWeb.ConnCase
 
-  import Hider.AccountsFixtures
-
   alias Hider.Accounts.User
 
-  @create_attrs %{
-    cpf: "some cpf",
-    first_name: "some first_name",
-    last_name: "some last_name",
-    middle_name: "some middle_name",
-    password_hash: "some password_hash",
-    rg: "some rg"
-  }
-  @update_attrs %{
-    cpf: "some updated cpf",
-    first_name: "some updated first_name",
-    last_name: "some updated last_name",
-    middle_name: "some updated middle_name",
-    password_hash: "some updated password_hash",
-    rg: "some updated rg"
-  }
-  @invalid_attrs %{cpf: nil, first_name: nil, last_name: nil, middle_name: nil, password_hash: nil, rg: nil}
+  alias HiderWeb.UserView
+
+  def to_safe_map(user) do
+    user
+    |> UserView.to_safe_map()
+  end
+
+  def to_map(user) do
+    user
+    |> Map.from_struct()
+  end
+
+  def to_string_keys(atom_map) do
+    atom_map
+    |> Enum.map(fn {k, v} -> {to_string(k), v} end)
+    |> Enum.into(%{})
+  end
 
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    [user: insert(:user), conn: put_req_header(conn, "accept", "application/json")]
   end
 
   describe "index" do
-    test "lists all users", %{conn: conn} do
+    test "lists all users", %{conn: conn, user: user} do
+      user_json = user |> to_safe_map() |> to_string_keys()
+
       conn = get(conn, Routes.user_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200)["data"] == [user_json]
     end
   end
 
   describe "create user" do
     test "renders user when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :create), user: @create_attrs)
+      user = :user |> build() |> to_map() |> Map.put(:password, "admin123")
+      conn = post(conn, Routes.user_path(conn, :create), user: user)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, Routes.user_path(conn, :show, id))
 
       assert %{
-               "id" => ^id,
-               "cpf" => "some cpf",
-               "first_name" => "some first_name",
-               "last_name" => "some last_name",
-               "middle_name" => "some middle_name",
-               "password_hash" => "some password_hash",
-               "rg" => "some rg"
-             } = json_response(conn, 200)["data"]
+               "id" => id,
+               "cpf" => user.cpf,
+               "email" => user.email,
+               "username" => user.username,
+               "first_name" => user.first_name,
+               "last_name" => user.last_name,
+               "middle_name" => user.middle_name,
+               "rg" => user.rg
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :create), user: @invalid_attrs)
+      user = build(:user, password: nil, password_hash: nil) |> to_safe_map()
+      conn = post(conn, Routes.user_path(conn, :create), user: user)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
 
   describe "update user" do
-    setup [:create_user]
-
     test "renders user when data is valid", %{conn: conn, user: %User{id: id} = user} do
-      conn = put(conn, Routes.user_path(conn, :update, user), user: @update_attrs)
+      new_middle_name = Faker.Person.PtBr.first_name()
+
+      conn =
+        put(conn, Routes.user_path(conn, :update, user), user: %{middle_name: new_middle_name})
+
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.user_path(conn, :show, id))
 
       assert %{
                "id" => ^id,
-               "cpf" => "some updated cpf",
-               "first_name" => "some updated first_name",
-               "last_name" => "some updated last_name",
-               "middle_name" => "some updated middle_name",
-               "password_hash" => "some updated password_hash",
-               "rg" => "some updated rg"
+               "middle_name" => ^new_middle_name
              } = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
-      conn = put(conn, Routes.user_path(conn, :update, user), user: @invalid_attrs)
+      conn = put(conn, Routes.user_path(conn, :update, user), user: %{username: nil})
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
 
   describe "delete user" do
-    setup [:create_user]
-
     test "deletes chosen user", %{conn: conn, user: user} do
       conn = delete(conn, Routes.user_path(conn, :delete, user))
       assert response(conn, 204)
@@ -95,10 +93,5 @@ defmodule HiderWeb.UserControllerTest do
         get(conn, Routes.user_path(conn, :show, user))
       end
     end
-  end
-
-  defp create_user(_) do
-    user = user_fixture()
-    %{user: user}
   end
 end
