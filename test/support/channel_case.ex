@@ -22,6 +22,7 @@ defmodule HiderWeb.ChannelCase do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
       import HiderWeb.ChannelCase
+      import Hider.Factory
 
       # The default endpoint for testing
       @endpoint HiderWeb.Endpoint

@@ -24,6 +24,7 @@ defmodule Hider.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Hider.DataCase
+      import Hider.Factory
     end
   end
 

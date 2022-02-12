@@ -23,6 +23,7 @@ defmodule HiderWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import HiderWeb.ConnCase
+      import Hider.Factory
 
       alias HiderWeb.Router.Helpers, as: Routes
 
