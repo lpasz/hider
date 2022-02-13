@@ -52,6 +52,7 @@ defmodule Hider.Accounts do
   def create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset(attrs)
+    |> User.maybe_put_password_hash()
     |> Repo.insert()
   end
 

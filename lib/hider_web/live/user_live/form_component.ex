@@ -7,10 +7,10 @@ defmodule HiderWeb.UserLive.FormComponent do
   def update(%{user: user} = assigns, socket) do
     changeset = Accounts.change_user(user)
 
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(:changeset, changeset)}
+    socket
+    |> assign(assigns)
+    |> assign(:changeset, changeset)
+    |> then(&{:ok, &1})
   end
 
   @impl true
@@ -30,10 +30,10 @@ defmodule HiderWeb.UserLive.FormComponent do
   defp save_user(socket, :edit, user_params) do
     case Accounts.update_user(socket.assigns.user, user_params) do
       {:ok, _user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "User updated successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+        socket
+        |> put_flash(:info, "User updated successfully")
+        |> push_redirect(to: socket.assigns.return_to)
+        |> then(&{:noreply, &1})
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -41,12 +41,12 @@ defmodule HiderWeb.UserLive.FormComponent do
   end
 
   defp save_user(socket, :new, user_params) do
-    case Accounts.create_user(user_params) do
+    case Accounts.create_user(user_params) |> IO.inspect() do
       {:ok, _user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "User created successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+        socket
+        |> put_flash(:info, "User created successfully")
+        |> push_redirect(to: socket.assigns.return_to)
+        |> then(&{:noreply, &1})
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}

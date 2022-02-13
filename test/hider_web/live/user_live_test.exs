@@ -4,18 +4,32 @@ defmodule HiderWeb.UserLiveTest do
   import Phoenix.LiveViewTest
   import Hider.AccountsFixtures
 
-  @create_attrs %{cpf: "some cpf", first_name: "some first_name", last_name: "some last_name", middle_name: "some middle_name", password_hash: "some password_hash", rg: "some rg"}
-  @update_attrs %{cpf: "some updated cpf", first_name: "some updated first_name", last_name: "some updated last_name", middle_name: "some updated middle_name", password_hash: "some updated password_hash", rg: "some updated rg"}
-  @invalid_attrs %{cpf: nil, first_name: nil, last_name: nil, middle_name: nil, password_hash: nil, rg: nil}
-
-  defp create_user(_) do
-    user = user_fixture()
-    %{user: user}
-  end
+  @create_attrs %{
+    cpf: "some cpf",
+    first_name: "some first_name",
+    last_name: "some last_name",
+    middle_name: "some middle_name",
+    password_hash: "some password_hash",
+    rg: "some rg"
+  }
+  @update_attrs %{
+    cpf: "some updated cpf",
+    first_name: "some updated first_name",
+    last_name: "some updated last_name",
+    middle_name: "some updated middle_name",
+    password_hash: "some updated password_hash",
+    rg: "some updated rg"
+  }
+  @invalid_attrs %{
+    cpf: nil,
+    first_name: nil,
+    last_name: nil,
+    middle_name: nil,
+    password_hash: nil,
+    rg: nil
+  }
 
   describe "Index" do
-    setup [:create_user]
-
     test "lists all users", %{conn: conn, user: user} do
       {:ok, _index_live, html} = live(conn, Routes.user_index_path(conn, :index))
 
@@ -76,8 +90,6 @@ defmodule HiderWeb.UserLiveTest do
   end
 
   describe "Show" do
-    setup [:create_user]
-
     test "displays user", %{conn: conn, user: user} do
       {:ok, _show_live, html} = live(conn, Routes.user_show_path(conn, :show, user))
 

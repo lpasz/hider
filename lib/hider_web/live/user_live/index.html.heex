@@ -21,7 +21,6 @@
       <th>Last name</th>
       <th>Cpf</th>
       <th>Rg</th>
-      <th>Password hash</th>
 
       <th></th>
     </tr>
@@ -34,7 +33,6 @@
         <td><%= user.last_name %></td>
         <td><%= user.cpf %></td>
         <td><%= user.rg %></td>
-        <td><%= user.password_hash %></td>
 
         <td>
           <span><%= live_redirect "Show", to: Routes.user_show_path(@socket, :show, user) %></span>
