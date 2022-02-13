@@ -41,7 +41,7 @@ defmodule HiderWeb.UserLive.FormComponent do
   end
 
   defp save_user(socket, :new, user_params) do
-    case Accounts.create_user(user_params) |> IO.inspect() do
+    case Accounts.create_user(user_params) do
       {:ok, _user} ->
         socket
         |> put_flash(:info, "User created successfully")

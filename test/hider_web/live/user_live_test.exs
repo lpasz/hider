@@ -2,13 +2,21 @@ defmodule HiderWeb.UserLiveTest do
   use HiderWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Hider.AccountsFixtures
 
-  setup do
-    [user: insert(:user)]
+  @delete_keys ~w(__meta__ id inserted_at updated_at password_hash)a
+
+  @create_attrs :user|> build() |> Map.from_struct() |> Map.drop(@delete_keys)
+  @update_attrs :user|> build() |> Map.from_struct() |> Map.drop(@delete_keys)
+  @invalid_attrs :user|> build(username: nil) |> Map.from_struct() |> Map.drop(@delete_keys)
+
+  defp create_user(_) do
+    user = :user |> insert()
+    %{user: user}
   end
 
   describe "Index" do
+    setup [:create_user]
+
     test "lists all users", %{conn: conn, user: user} do
       {:ok, _index_live, html} = live(conn, Routes.user_index_path(conn, :index))
 
@@ -19,30 +27,32 @@ defmodule HiderWeb.UserLiveTest do
     test "saves new user", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, Routes.user_index_path(conn, :index))
 
-      assert index_live |> element("a", "New User") |> render_click() =~
-               "New User"
+      assert index_live
+             |> element("a", "New User")
+             |> render_click() =~ "New User"
 
       assert_patch(index_live, Routes.user_index_path(conn, :new))
 
       assert index_live
-             |> form("#user-form", user: build(:user, username: nil))
+             |> form("#user-form", user: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       {:ok, _, html} =
         index_live
-        |> form("#user-form", user: build(:user, username: "some user"))
+        |> form("#user-form", user: @create_attrs)
         |> render_submit()
         |> follow_redirect(conn, Routes.user_index_path(conn, :index))
 
       assert html =~ "User created successfully"
-      assert html =~ "some user"
+      assert html =~ @create_attrs.cpf
     end
 
     test "updates user in listing", %{conn: conn, user: user} do
       {:ok, index_live, _html} = live(conn, Routes.user_index_path(conn, :index))
 
-      assert index_live |> element("#user-#{user.id} a", "Edit") |> render_click() =~
-               "Edit User"
+      assert index_live
+             |> element("#user-#{user.id} a", "Edit")
+             |> render_click() =~ "Edit User"
 
       assert_patch(index_live, Routes.user_index_path(conn, :edit, user))
 
@@ -57,7 +67,7 @@ defmodule HiderWeb.UserLiveTest do
         |> follow_redirect(conn, Routes.user_index_path(conn, :index))
 
       assert html =~ "User updated successfully"
-      assert html =~ "some updated cpf"
+      assert html =~ @update_attrs.cpf
     end
 
     test "deletes user in listing", %{conn: conn, user: user} do
@@ -69,6 +79,8 @@ defmodule HiderWeb.UserLiveTest do
   end
 
   describe "Show" do
+    setup [:create_user]
+
     test "displays user", %{conn: conn, user: user} do
       {:ok, _show_live, html} = live(conn, Routes.user_show_path(conn, :show, user))
 
@@ -95,7 +107,7 @@ defmodule HiderWeb.UserLiveTest do
         |> follow_redirect(conn, Routes.user_show_path(conn, :show, user))
 
       assert html =~ "User updated successfully"
-      assert html =~ "some updated cpf"
+      assert html =~ @update_attrs.cpf
     end
   end
 end

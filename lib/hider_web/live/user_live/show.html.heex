@@ -14,6 +14,15 @@
 <% end %>
 
 <ul>
+  <li>
+    <strong>Email:</strong>
+    <%= @user.email %>
+  </li>
+
+  <li>
+    <strong>Username:</strong>
+    <%= @user.username %>
+  </li>
 
   <li>
     <strong>First name:</strong>
@@ -40,12 +49,12 @@
     <%= @user.rg %>
   </li>
 
-  <li>
-    <strong>Password hash:</strong>
-    <%= @user.password_hash %>
-  </li>
-
 </ul>
 
-<span><%= live_patch "Edit", to: Routes.user_show_path(@socket, :edit, @user), class: "button" %></span> |
-<span><%= live_redirect "Back", to: Routes.user_index_path(@socket, :index) %></span>
+<span>
+  <%= live_patch "Edit", to: Routes.user_show_path(@socket, :edit, @user), class: "button" %>
+</span>
+
+<span>
+  <%= live_redirect "Back", to: Routes.user_index_path(@socket, :index) %>
+</span>
