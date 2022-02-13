@@ -4,30 +4,9 @@ defmodule HiderWeb.UserLiveTest do
   import Phoenix.LiveViewTest
   import Hider.AccountsFixtures
 
-  @create_attrs %{
-    cpf: "some cpf",
-    first_name: "some first_name",
-    last_name: "some last_name",
-    middle_name: "some middle_name",
-    password_hash: "some password_hash",
-    rg: "some rg"
-  }
-  @update_attrs %{
-    cpf: "some updated cpf",
-    first_name: "some updated first_name",
-    last_name: "some updated last_name",
-    middle_name: "some updated middle_name",
-    password_hash: "some updated password_hash",
-    rg: "some updated rg"
-  }
-  @invalid_attrs %{
-    cpf: nil,
-    first_name: nil,
-    last_name: nil,
-    middle_name: nil,
-    password_hash: nil,
-    rg: nil
-  }
+  setup do
+    [user: insert(:user)]
+  end
 
   describe "Index" do
     test "lists all users", %{conn: conn, user: user} do
@@ -46,17 +25,17 @@ defmodule HiderWeb.UserLiveTest do
       assert_patch(index_live, Routes.user_index_path(conn, :new))
 
       assert index_live
-             |> form("#user-form", user: @invalid_attrs)
+             |> form("#user-form", user: build(:user, username: nil))
              |> render_change() =~ "can&#39;t be blank"
 
       {:ok, _, html} =
         index_live
-        |> form("#user-form", user: @create_attrs)
+        |> form("#user-form", user: build(:user, username: "some user"))
         |> render_submit()
         |> follow_redirect(conn, Routes.user_index_path(conn, :index))
 
       assert html =~ "User created successfully"
-      assert html =~ "some cpf"
+      assert html =~ "some user"
     end
 
     test "updates user in listing", %{conn: conn, user: user} do
