@@ -17,7 +17,7 @@ defmodule HiderWeb.UserLive.FormComponent do
   def handle_event("validate", %{"user" => user_params}, socket) do
     changeset =
       socket.assigns.user
-      |> Accounts.change_user(user_params)
+      |> Accounts.change_user(parse_user_params(user_params))
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
@@ -27,7 +27,18 @@ defmodule HiderWeb.UserLive.FormComponent do
     save_user(socket, socket.assigns.action, user_params)
   end
 
+  defp parse_user_params(user_params) do
+    only_digits = &String.replace(&1, ~r/[^0-9]/, "")
+
+    user_params
+    |> Map.update("cpf", "", only_digits)
+    |> Map.update("rg", "", only_digits)
+    |> IO.inspect()
+  end
+
   defp save_user(socket, :edit, user_params) do
+    user_params = parse_user_params(user_params)
+
     case Accounts.update_user(socket.assigns.user, user_params) do
       {:ok, _user} ->
         socket
