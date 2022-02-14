@@ -33,7 +33,6 @@ defmodule HiderWeb.UserLive.FormComponent do
     user_params
     |> Map.update("cpf", "", only_digits)
     |> Map.update("rg", "", only_digits)
-    |> IO.inspect()
   end
 
   defp save_user(socket, :edit, user_params) do

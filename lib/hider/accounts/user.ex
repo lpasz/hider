@@ -4,6 +4,7 @@ defmodule Hider.Accounts.User do
 
   @cast_fields ~w(cpf email first_name last_name middle_name password password_confirmation rg username)a
   @required_fields ~w(cpf email first_name last_name middle_name rg username)a
+  @unique_fields ~w(email username rg cpf)a
 
   schema "users" do
     field :cpf, :string
@@ -31,6 +32,7 @@ defmodule Hider.Accounts.User do
     |> validate_length(:username, max: 255)
     |> validate_length(:password, max: 255)
     |> validate_length(:password_confirmation, max: 255)
+    |> unique_constraint(@unique_fields)
     |> validate_required(@required_fields)
   end
 
