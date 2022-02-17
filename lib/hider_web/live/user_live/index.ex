@@ -6,7 +6,10 @@ defmodule HiderWeb.UserLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :users, list_users())}
+    socket
+    |> assign(:users, list_users())
+    |> assign(:search, %{search: ""})
+    |> then(fn socket -> {:ok, socket} end)
   end
 
   @impl true
@@ -32,6 +35,10 @@ defmodule HiderWeb.UserLive.Index do
     |> assign(:user, nil)
   end
 
+  def handle_event("search", %{"search" => %{"search" => cpf}}, socket) do
+    {:noreply, assign(socket, :users, [search(cpf)])}
+  end
+
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     user = Accounts.get_user!(id)
@@ -42,5 +49,9 @@ defmodule HiderWeb.UserLive.Index do
 
   defp list_users do
     Accounts.list_users()
+  end
+
+  defp search(cpf) do
+    Accounts.get_user_by_cpf(cpf)
   end
 end
