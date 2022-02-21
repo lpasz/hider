@@ -2,10 +2,10 @@ defmodule Hider.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias Hider.Crypt.{AES, Argon2}
+  alias Hider.Accounts.Trigram
 
   @cast_fields ~w(cpf email first_name last_name middle_name password password_confirmation rg username)a
   @required_fields ~w(cpf email first_name last_name middle_name rg username)a
-  @unique_fields ~w(email username rg cpf)a
 
   schema "users" do
     field :cpf, :string
@@ -19,6 +19,8 @@ defmodule Hider.Accounts.User do
     field :password_confirmation, :string, virtual: true
     field :rg, :string
     field :username, :string
+
+    has_many :trigrams, Trigram
 
     timestamps()
   end
@@ -34,7 +36,10 @@ defmodule Hider.Accounts.User do
     |> validate_length(:username, max: 255)
     |> validate_length(:password, max: 255)
     |> validate_length(:password_confirmation, max: 255)
-    |> unique_constraint(@unique_fields)
+    |> unique_constraint(:email)
+    |> unique_constraint(:username)
+    |> unique_constraint(:cpf)
+    |> unique_constraint(:rg)
     |> validate_required(@required_fields)
   end
 

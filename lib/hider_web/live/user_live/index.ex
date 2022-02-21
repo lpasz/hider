@@ -35,8 +35,8 @@ defmodule HiderWeb.UserLive.Index do
     |> assign(:user, nil)
   end
 
-  def handle_event("search", %{"search" => %{"search" => cpf}}, socket) do
-    {:noreply, assign(socket, :users, [search(cpf)])}
+  def handle_event("search", %{"search" => %{"search" => search}}, socket) do
+    {:noreply, assign(socket, :users, search(search))}
   end
 
   @impl true
@@ -51,7 +51,7 @@ defmodule HiderWeb.UserLive.Index do
     Accounts.list_users()
   end
 
-  defp search(cpf) do
-    Accounts.get_user_by_cpf(cpf)
+  defp search(search) do
+    Accounts.fuzzy_search(search)
   end
 end

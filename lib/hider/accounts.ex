@@ -4,9 +4,11 @@ defmodule Hider.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias Hider.Repo
 
+  alias Ecto.Multi
+  alias Hider.Accounts.Trigram
   alias Hider.Accounts.User
+  alias Hider.Repo
 
   @doc """
   Returns the list of users.
@@ -19,6 +21,20 @@ defmodule Hider.Accounts do
   """
   def list_users do
     Repo.all(User)
+  end
+
+  @doc """
+  Fuzzy Full Text Search for user
+  """
+  def fuzzy_search(text) do
+    trigrams = Trigram.make_trigrams(text)
+
+    Trigram
+    |> where([t], t.trigram in ^trigrams)
+    |> distinct([t], t.user_id)
+    |> preload(:user)
+    |> Repo.all()
+    |> Enum.map(& &1.user)
   end
 
   @doc """
@@ -58,11 +74,43 @@ defmodule Hider.Accounts do
 
   """
   def create_user(attrs \\ %{}) do
+    Multi.new()
+    |> Multi.put(:attrs, attrs)
+    |> Multi.insert(:user, &do_create_user_changeset/1)
+    |> Multi.insert_all(:trigrams, Trigram, &do_create_trigrams/1)
+    |> Repo.transaction(timeout: 600_000)
+    |> then(fn
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, _, reason, _} -> {:error, reason}
+    end)
+  end
+
+  defp do_create_user_changeset(changes) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.changeset(changes.attrs)
     |> User.maybe_put_password_hash()
     |> User.put_encrypt_cpf()
-    |> Repo.insert()
+  end
+
+  defp do_create_trigrams(changes) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    changes.user
+    |> Map.from_struct()
+    |> Enum.reduce([], fn {key, val}, acc ->
+      cond do
+      key in ~w(email first_email middle_name last_name cpf rg)a ->
+        trigrams =
+          val
+          |> Trigram.make_trigrams()
+          |> Enum.map(&%{trigram: &1, user_id: changes.user.id, updated_at: now, inserted_at: now})
+
+        trigrams ++ acc
+
+      true ->
+        acc
+      end
+    end)
   end
 
   @doc """
