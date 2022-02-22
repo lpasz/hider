@@ -1,7 +1,6 @@
 defmodule Hider.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Hider.Crypt.{AES, Argon2}
 
   @cast_fields ~w(cpf email first_name last_name middle_name password password_confirmation rg username)a
   @required_fields ~w(cpf email first_name last_name middle_name rg username)a
@@ -9,7 +8,6 @@ defmodule Hider.Accounts.User do
 
   schema "users" do
     field :cpf, :string
-    field :cpf_blind, :binary
     field :email, :string
     field :first_name, :string
     field :last_name, :string
@@ -74,16 +72,5 @@ defmodule Hider.Accounts.User do
     else
       validate_required(changeset, :password)
     end
-  end
-
-  def put_encrypt_cpf(changeset) do
-    cpf = get_field(changeset, :cpf)
-
-    cpf_encrypted = AES.encrypt(cpf)
-    cpf_blind_index = Argon2.hash(cpf)
-
-    changeset
-    |> put_change(:cpf, cpf_encrypted)
-    |> put_change(:cpf_blind, cpf_blind_index)
   end
 end
