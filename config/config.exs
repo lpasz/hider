@@ -10,12 +10,6 @@ import Config
 config :hider,
   ecto_repos: [Hider.Repo]
 
-# Only for learning, don't keep this out in the open, hide away
-config :hider, :aes, priv_key: "sp8QnlOW1ULbcDb5ocJ/1Syxgnlp0RZYdQkFCDT6UyU="
-
-# Only for learning, don't keep this out in the open, hide away
-config :hider, :argon2, salt: "HSoaik8ACr6z6yXrrh7zTw=="
-
 # Configures the endpoint
 config :hider, HiderWeb.Endpoint,
   url: [host: "localhost"],

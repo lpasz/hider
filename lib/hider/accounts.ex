@@ -37,14 +37,6 @@ defmodule Hider.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
-  def get_user_by_cpf(cpf) do
-    cpf
-    |> Hider.Crypt.Argon2.hash()
-    |> then(fn cpf_hash ->
-      Repo.get_by(User, cpf_blind: cpf_hash)
-    end)
-  end
-
   @doc """
   Creates a user.
 
@@ -61,7 +53,6 @@ defmodule Hider.Accounts do
     %User{}
     |> User.changeset(attrs)
     |> User.maybe_put_password_hash()
-    |> User.put_encrypt_cpf()
     |> Repo.insert()
   end
 
