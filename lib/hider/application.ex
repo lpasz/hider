@@ -15,7 +15,8 @@ defmodule Hider.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Hider.PubSub},
       # Start the Endpoint (http/https)
-      HiderWeb.Endpoint
+      HiderWeb.Endpoint,
+      {Oban, oban_config()}
       # Start a worker by calling: Hider.Worker.start_link(arg)
       # {Hider.Worker, arg}
     ]
@@ -32,5 +33,10 @@ defmodule Hider.Application do
   def config_change(changed, _new, removed) do
     HiderWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+   # Conditionally disable queues or plugins here.
+   defp oban_config do
+    Application.fetch_env!(:hider, Oban)
   end
 end

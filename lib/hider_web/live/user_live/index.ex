@@ -7,7 +7,7 @@ defmodule HiderWeb.UserLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket
-    |> assign(:users, list_users())
+    |> assign(:users, list_users() |> Enum.map(&User.decrypt(&1, :all)))
     |> assign(:search, %{search: ""})
     |> then(fn socket -> {:ok, socket} end)
   end
@@ -20,7 +20,7 @@ defmodule HiderWeb.UserLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit User")
-    |> assign(:user, Accounts.get_user!(id))
+    |> assign(:user, Accounts.get_user!(id) |> User.decrypt(:all))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -36,7 +36,10 @@ defmodule HiderWeb.UserLive.Index do
   end
 
   def handle_event("search", %{"search" => %{"search" => search}}, socket) do
-    {:noreply, assign(socket, :users, search(search))}
+    search
+    |> search()
+    |> Enum.map(&User.decrypt(&1, :all))
+    |> then(&{:noreply, assign(socket, :users, &1)})
   end
 
   @impl true
@@ -44,7 +47,7 @@ defmodule HiderWeb.UserLive.Index do
     user = Accounts.get_user!(id)
     {:ok, _} = Accounts.delete_user(user)
 
-    {:noreply, assign(socket, :users, list_users())}
+    {:noreply, assign(socket, :users, list_users() |> Enum.map(&User.decrypt(&1, :all)))}
   end
 
   defp list_users do

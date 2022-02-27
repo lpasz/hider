@@ -23,7 +23,7 @@
   <%= text_input f, :search %>
 
   <div>
-    <%= submit "Save", phx_disable_with: "Saving..." %>
+    <%= submit "Search", phx_disable_with: "Searching..." %>
   </div>
 </.form>
 
@@ -45,7 +45,7 @@
         <td><%= user.first_name %></td>
         <td><%= user.middle_name %></td>
         <td><%= user.last_name %></td>
-        <td><%= Hider.Crypt.AES.decrypt(user.cpf)  %></td>
+        <td><%= user.cpf  %></td>
         <td><%= user.rg %></td>
 
         <td>
