@@ -13,6 +13,20 @@
   </.modal>
 <% end %>
 
+<.form
+  let={f}
+  for={:search}
+  id="search-form"
+  phx-submit="search">
+    
+  <%= label f, :search %>
+  <%= text_input f, :search %>
+
+  <div>
+    <%= submit "Search", phx_disable_with: "Searching..." %>
+  </div>
+</.form>
+
 <table>
   <thead>
     <tr>
