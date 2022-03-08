@@ -5,9 +5,9 @@ defmodule HiderWeb.UserLiveTest do
 
   @delete_keys ~w(__meta__ id inserted_at updated_at password_hash)a
 
-  @create_attrs :user|> build() |> Map.from_struct() |> Map.drop(@delete_keys)
-  @update_attrs :user|> build() |> Map.from_struct() |> Map.drop(@delete_keys)
-  @invalid_attrs :user|> build(username: nil) |> Map.from_struct() |> Map.drop(@delete_keys)
+  @create_attrs :user |> build() |> Map.from_struct() |> Map.drop(@delete_keys)
+  @update_attrs :user |> build() |> Map.from_struct() |> Map.drop(@delete_keys)
+  @invalid_attrs :user |> build(username: nil) |> Map.from_struct() |> Map.drop(@delete_keys)
 
   defp create_user(_) do
     user = :user |> insert()

@@ -10,7 +10,7 @@ defmodule HiderWeb.UserLive.Index do
     users = list_users() |> decrypt()
 
     socket
-    |> assign(:users, users)
+    |> assign(:users, list_users() |> Enum.map(&User.decrypt(&1, :all)))
     |> assign(:search, %{search: ""})
     |> then(fn socket -> {:ok, socket} end)
   end
@@ -25,7 +25,7 @@ defmodule HiderWeb.UserLive.Index do
 
     socket
     |> assign(:page_title, "Edit User")
-    |> assign(:user, user)
+    |> assign(:user, Accounts.get_user!(id) |> User.decrypt(:all))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -40,8 +40,11 @@ defmodule HiderWeb.UserLive.Index do
     |> assign(:user, nil)
   end
 
-  def handle_event("search", %{"search" => %{"search" => cpf}}, socket) do
-    {:noreply, assign(socket, :users, [search(cpf)])}
+  def handle_event("search", %{"search" => %{"search" => search}}, socket) do
+    search
+    |> search()
+    |> Enum.map(&User.decrypt(&1, :all))
+    |> then(&{:noreply, assign(socket, :users, &1)})
   end
 
   @impl true
@@ -49,14 +52,14 @@ defmodule HiderWeb.UserLive.Index do
     user = Accounts.get_user!(id)
     {:ok, _} = Accounts.delete_user(user)
 
-    {:noreply, assign(socket, :users, list_users() |> decrypt())}
+    {:noreply, assign(socket, :users, list_users() |> Enum.map(&User.decrypt(&1, :all)))}
   end
 
   defp list_users do
     Accounts.list_users()
   end
 
-  defp search(cpf) do
-    Accounts.get_user_by_cpf(cpf) |> decrypt()
+  defp search(search) do
+    Accounts.fuzzy_search(search)
   end
 end
