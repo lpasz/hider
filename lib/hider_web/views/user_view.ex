@@ -1,6 +1,16 @@
 defmodule HiderWeb.UserView do
   use HiderWeb, :view
   alias HiderWeb.UserView
+  alias Hider.Accounts.User
+  alias Hider.Crypt.AES
+
+  def decrypt(value) do
+    case value do
+      users when is_list(users) -> Enum.map(users, &decrypt/1)
+      %User{} = user -> Map.put(user, :cpf, decrypt(user.cpf))
+      cpf -> AES.decrypt(cpf)
+    end
+  end
 
   def render("index.json", %{users: users}) do
     %{data: render_many(users, UserView, "user.json")}

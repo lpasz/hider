@@ -3,9 +3,12 @@ defmodule HiderWeb.UserLive.Index do
 
   alias Hider.Accounts
   alias Hider.Accounts.User
+  import HiderWeb.UserView
 
   @impl true
   def mount(_params, _session, socket) do
+    users = list_users() |> decrypt()
+
     socket
     |> assign(:users, list_users() |> Enum.map(&User.decrypt(&1, :all)))
     |> assign(:search, %{search: ""})
@@ -18,6 +21,8 @@ defmodule HiderWeb.UserLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    user = id |> Accounts.get_user!() |> decrypt()
+
     socket
     |> assign(:page_title, "Edit User")
     |> assign(:user, Accounts.get_user!(id) |> User.decrypt(:all))
